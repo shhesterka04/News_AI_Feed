@@ -2,7 +2,10 @@ package fetcher
 
 import (
 	"context"
+	"log"
 	"news_ai_feed/internal/model"
+	"news_ai_feed/internal/source"
+	"sync"
 	"time"
 )
 
@@ -37,13 +40,82 @@ func NewFetcher(articles ArticleStorage, sources SourceProvider, fetchInterval t
 	}
 }
 
-//func (f *Fetcher) Fetch(ctx context.Context) error {
-//	sources, err := f.sources.Sources(ctx)
-//	if err != nil {
-//		return err
-//	}
-//
-//	var wg sync.WaitGroup
-//
-//	for _
-//}
+func (f *Fetcher) Fetch(ctx context.Context) error {
+	sources, err := f.sources.Sources(ctx)
+	if err != nil {
+		return err
+	}
+
+	var wg sync.WaitGroup
+
+	for _, src := range sources {
+		wg.Add(1)
+
+		rssSource := source.NewRSSSource(src)
+
+		go func(source Source) {
+			defer wg.Done()
+
+			items, err := source.Fetch(ctx)
+			if err != nil {
+				log.Printf("[ERROR] Fetching items from source %s: %v", source, err)
+				return
+			}
+
+			if err := f.processItems(ctx, source, items); err != nil {
+				log.Printf("[ERROR] Processing items from source %s: %v", source, err)
+				return
+			}
+		}(rssSource)
+
+		wg.Wait()
+
+		return nil
+	}
+}
+
+func (f *Fetcher) Start(ctx context.Context) error {
+	ticker := time.NewTicker(f.fetchInterval)
+	defer ticker.Stop()
+
+	if err := f.Fetch(ctx); err != nil {
+		return err
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			if err := f.Fetch(ctx); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func (f *Fetcher) processItems(ctx context.Context, source Source, items []model.Item) error {
+	for _, item := range items {
+		item.Date = item.Date.UTC()
+
+		if f.itemFilter(item) {
+			continue
+		}
+
+		if err := f.articles.Store(ctx, model.Article{
+			SourceID:    source.ID(),
+			Title:       item.Title,
+			FeedURL:     item.Link,
+			Summary:     item.Summary,
+			PublishedAt: item.Date,
+		}); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (f *Fetcher) itemFilter(item model.Item) bool {
+	return true
+}
