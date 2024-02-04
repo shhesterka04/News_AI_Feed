@@ -70,9 +70,9 @@ func (f *Fetcher) Fetch(ctx context.Context) error {
 		}(rssSource)
 
 		wg.Wait()
-
-		return nil
 	}
+
+	return nil
 }
 
 func (f *Fetcher) Start(ctx context.Context) error {
