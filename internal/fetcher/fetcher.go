@@ -5,6 +5,7 @@ import (
 	"log"
 	"news_ai_feed/internal/model"
 	"news_ai_feed/internal/source"
+	"strings"
 	"sync"
 	"time"
 )
@@ -117,5 +118,19 @@ func (f *Fetcher) processItems(ctx context.Context, source Source, items []model
 }
 
 func (f *Fetcher) itemFilter(item model.Item) bool {
-	return true
+	categories := make(map[string]interface{})
+
+	for _, keyword := range f.filterKeywords {
+		keywordInTitle := strings.Contains(strings.ToLower(item.Title), keyword)
+
+		if _, ok := categories[keyword]; ok {
+			return true
+		}
+
+		if keywordInTitle {
+			return true
+		}
+	}
+
+	return false
 }
