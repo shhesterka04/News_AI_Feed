@@ -6,6 +6,7 @@ import (
 	"github.com/go-shiori/go-readability"
 	"io"
 	"net/http"
+	"news_ai_feed/internal/botkit/markup"
 	"news_ai_feed/internal/model"
 	"regexp"
 	"strings"
@@ -101,7 +102,12 @@ func (n *Notifier) extractSummary(ctx context.Context, article model.Article) (s
 func (n *Notifier) sendArticle(article model.Article, summary string) error {
 	const msgFormat = "*%s*%s\n\n%s"
 
-	msg := tgbotapi.NewMessage(n.channelID, fmt.Sprint(msgFormat, article.Title, summary, article.Link))
+	msg := tgbotapi.NewMessage(n.channelID, fmt.Sprint(
+		msgFormat,
+		markup.EscapeForMarkdown(article.Title),
+		markup.EscapeForMarkdown(summary),
+		markup.EscapeForMarkdown(article.Link),
+	))
 	msg.ParseMode = tgbotapi.ModeMarkdownV2
 
 	_, err := n.bot.Send(msg)
