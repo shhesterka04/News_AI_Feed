@@ -36,11 +36,11 @@ type Notifier struct {
 	channelID        int64
 }
 
-func New(articles ArticleProvider, summarizer Summarizer, bot *tgbotapi.BotAPI, sendInterval, lookupTimeWindow time.Duration, channelID int64) *Notifier {
+func New(articles ArticleProvider, summarizer Summarizer, sendInterval, lookupTimeWindow time.Duration, channelID int64) *Notifier {
 	return &Notifier{
-		articles:         articles,
-		summarizer:       summarizer,
-		bot:              bot,
+		articles:   articles,
+		summarizer: summarizer,
+		//bot:              bot,
 		sendInterval:     sendInterval,
 		lookupTimeWindow: lookupTimeWindow,
 		channelID:        channelID,

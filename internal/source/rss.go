@@ -2,7 +2,6 @@ package source
 
 import (
 	"context"
-
 	"github.com/SlyMarbo/rss"
 
 	"news_ai_feed/internal/model"
@@ -56,7 +55,6 @@ func (s RSSSource) loadFeed(ctx context.Context, url string) (*rss.Feed, error) 
 			errCh <- err
 			return
 		}
-
 		feedCh <- feed
 	}()
 

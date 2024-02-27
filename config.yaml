@@ -1,0 +1,8 @@
+telegramToken: "123456789:ABCDEF"
+telegramChannelID: 1
+databaseDSN: "postgres://postgres:postgres@localhost:5432/news_ai_feed?sslmode=disable"
+fetchInterval: 60s
+notificationInterval: 60s
+filterKeywords: ["keyword1", "keyword2"]
+openAIKey: "sk-123456789:ABCDEF"
+openAIPromt: "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly."

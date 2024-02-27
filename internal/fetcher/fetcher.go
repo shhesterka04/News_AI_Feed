@@ -106,7 +106,7 @@ func (f *Fetcher) processItems(ctx context.Context, source Source, items []model
 		if err := f.articles.Store(ctx, model.Article{
 			SourceID:    source.ID(),
 			Title:       item.Title,
-			FeedURL:     item.Link,
+			Link:        item.Link,
 			Summary:     item.Summary,
 			PublishedAt: item.Date,
 		}); err != nil {

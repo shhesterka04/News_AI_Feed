@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"errors"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"log"
 	"news_ai_feed/internal/config"
 	"news_ai_feed/internal/fetcher"
@@ -17,15 +17,16 @@ import (
 )
 
 func main() {
-	botAPI, err := tgbotapi.NewBotAPI(config.Get().TelegramToken)
-	if err != nil {
-		log.Printf("failed to create bot: %v", err)
-		return
-	}
+	//botAPI, err := tgbotapi.NewBotAPI(config.Get().TelegramToken)
+	//if err != nil {
+	//	log.Printf("failed to create bot: %v", err)
+	//	return
+	//}
 
 	db, err := sqlx.Connect("postgres", config.Get().DatabaseDSN)
 	if err != nil {
 		log.Printf("failed to connect to database: %v", err)
+		return
 	}
 	defer db.Close()
 
@@ -41,7 +42,7 @@ func main() {
 		notifier = notifier.New(
 			articleStorage,
 			summary.NewOpenAISummarizer(config.Get().OpenAIKey, config.Get().OpenAIPromt),
-			botAPI,
+			//botAPI,
 			config.Get().NotificationInterval,
 			2*config.Get().FetchInterval,
 			config.Get().TelegramChannelID,

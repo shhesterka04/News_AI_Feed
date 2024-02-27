@@ -23,7 +23,7 @@ func (s *ArticlePostgresStorage) Store(ctx context.Context, article model.Articl
 	}
 	defer conn.Close()
 
-	query := `INSERT INTO articles (source_id, title, link, summary, published_at) VALUES ($1, $2, $3, $4, $5)
+	query := `INSERT INTO articles (source_id, title, link, summary, published_at, created_at) VALUES ($1, $2, $3, $4, $5, NOW())
 ON CONFLICT DO NOTHING;`
 	if _, err := conn.ExecContext(ctx, query, article.SourceID, article.Title, article.Link, article.Summary, article.PublishedAt); err != nil {
 		return err
@@ -83,4 +83,5 @@ type dbArticle struct {
 	Summary     string       `db:"summary"`
 	PublishedAt time.Time    `db:"published_at"`
 	PostedAt    sql.NullBool `db:"posted_at"`
+	CreatedAt   time.Time    `db:"created_at"`
 }
